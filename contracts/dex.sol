@@ -12,10 +12,33 @@ contract Dex {
     // 売却者のアドレス_seller、売却したトークンコントラクトのアドレス_tokenAddr、売却者がDEXに転送したトークンの量_cost、対価としてDEXから支払われたETHの量_amount
     event sell(address _seller, address _tokenAddr, uint256 _cost, uint256 _amount);
 
+    // 指定されたトークンが売買可能かを管理するマッピング
+    mapping(address => bool) public supportedTokenAddr;
+
+    // 引数として渡される_tokenAddrがsupportedTokenAddrマッピングに存在するかを確認する関数
+    // この処理はbuyToken関数とsellToken関数が呼び出されたときに共通で実行したい処理なので、関数修飾子として定義
+    modifier supportsToken(address _tokenAddr) {
+        // supportedTokenAddrマッピング内の_tokenAddrというキーに紐づくバリューがtrueであることを確認
+        require(supportedTokenAddr[_tokenAddr] == true, "This token is not supported");
+        // _;は、関数修飾子を定義するときに最後につける決まり
+        _;
+    }
+
+    // コンストラクタを定義
+    // supportedTokenAddrマッピングに売買可能なトークンコントラクトのアドレスとtrueがセットで記録されるように実装
+    // デプロイしたトークンコントラクトアドレスの配列を_tokenAddrsとして受け取る
+    constructor(address[] memory _tokenAddrs) {
+        // _tokenAddrsの要素の数だけ繰り返し処理を行う
+        for(uint i=0; i < _tokenAddrs.length; i++) {
+            supportedTokenAddr[_tokenAddrs[i]] = true;
+        }
+    }
+
     // トークンを購入する関数
     // 購入したいトークンコントラクトのアドレス_tokenAddr、トークン購入のためにに支払う必要のあるETH_cost、購入したいトークン量_amount
     // DEXコントラクトにETHを送金するため、payable修飾子をつける
-    function  buyToken(address _tokenAddr, uint256 _cost, uint256 _amount) external payable {
+    // この関数が呼び出されたとき、supportsTokenが呼び出される
+    function buyToken(address _tokenAddr, uint256 _cost, uint256 _amount) external payable supportsToken(_tokenAddr) {
         // ERC20コントラクトを継承したトークンコントラクトのアドレスに、_tokenAddrを型キャストして格納
         ERC20 token = ERC20(_tokenAddr);
         // ユーザが支払ったETHがトークンを購入するためのcost以上かを確認
@@ -30,7 +53,8 @@ contract Dex {
 
     // トークンを売却する関数
     // 売却したいトークンコントラクトのアドレス_tokenAddr、売却したいトークン量_cost、対価として受け取るETHの量_amount
-    function sellToken(address _tokenAddr, uint256 _cost, uint256 _amount) external {
+    // この関数が呼び出されたとき、supportsTokenが呼び出される
+    function sellToken(address _tokenAddr, uint256 _cost, uint256 _amount) external supportsToken(_tokenAddr) {
         // ERC20という型のtokenを生成し、_tokenAddrをERC20型にキャストしている
         ERC20 token = ERC20(_tokenAddr);
         // DEXコントラクトに売却しようとしているトークンが、msg.senderのトークン残高を超えていないか確認
