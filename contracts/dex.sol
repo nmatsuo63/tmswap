@@ -24,4 +24,25 @@ contract Dex {
         emit buy(msg.sender, _tokenAddr, _cost, _amount);
     }
 
+    // トークンを売却する関数
+    // 売却したいトークンコントラクトのアドレス_tokenAddr、売却したいトークン量_cost、対価として受け取るETHの量_amount
+    function sellToken(address _tokenAddr, uint256 _cost, uint256 _amount) external {
+        // ERC20という型のtokenを生成し、_tokenAddrをERC20型にキャストしている
+        ERC20 token = ERC20(_tokenAddr);
+        // DEXコントラクトに売却しようとしているトークンが、msg.senderのトークン残高を超えていないか確認
+        require(token.balanceOf(msg.sender) >= _cost, "Insufficient token balance...");
+        // 対価としてmsg.senderに支払うETHが、DEXコントラクトのETH残高を超えていないか確認
+        // thisとはコントラクトのこと。address(this)はthisを型キャストしている
+        require(address(this).balance >= _amount, "Dex does not have enough ETH...");
+        // 売却するトークンをmsg.senderからDEXコントラクトに転送
+        // tokenが持つtransferFromなので、ERC20.sol内に定義したtransferFromを利用している
+        token.transferFrom(msg.sender, address(this), _cost);
+        // トークンを売却した対価として、DEXコントラクトからmsg.senderにETHを支払う
+        // msg.senderをpayable型アドレスにキャストしている（ETHを受け取れるアドレスに変更している）
+        // bool型変数successには、正常に送金された場合はtrue、失敗した場合はfalseが入る
+        (bool success, ) = payable(msg.sender).call{value: _amount}("");
+        // ETHの送金が正常に行われたかを確認
+        require(success, "ETH transfer failed");
+    }
+
 }
