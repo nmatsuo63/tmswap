@@ -72,7 +72,7 @@ contract ERC20 {
         // 転送元のトークン残高_fromから転送トークン量_valueを減らす
         balances[_from] -= _value;
         // 転送先のトークン残高_toに転送トークン量_valueを足す
-        balances[_to] -= _value;
+        balances[_to] += _value;
         // イベントの実行
         emit Transfer(_from, _to, _value);
     }
