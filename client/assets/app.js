@@ -4,8 +4,8 @@ let web3, user, dexInst, tokenInst;
 let priceData;
 let finalInput, finalOutput;
 
-const tccAddr = "";
-const dexAddr = "";
+const tmcAddr = "0x6C3A78ED9955C42f2aF6Ef3dea488b0B7492673f";
+const dexAddr = "0x2e027586428CB844313E5119bC07fe86FF82B793";
 
 $(document).on('click', ".dropdown-menu li a", function () {
   let element = $(this);
@@ -14,8 +14,8 @@ $(document).on('click', ".dropdown-menu li a", function () {
   token = text.replace(/\s/g, "");
   if(user){
     switch(token){
-      case "TCC":
-        tokenInst = new web3.eth.Contract(abi.token, tccAddr, {from : user});
+      case "TMC":
+        tokenInst = new web3.eth.Contract(abi.token, tmcAddr, {from : user});
         break;
     }
   }
@@ -79,7 +79,7 @@ $("#input").on("input", async function () {
 async function updateOutput(input){
   let output;
   switch(token){
-    case "TCC":
+    case "TMC":
       output = buyMode ? input / priceData : input * priceData;
       break;
   }

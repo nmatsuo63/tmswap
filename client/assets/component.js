@@ -20,7 +20,7 @@ let tokenBox =
 `
 <button class="btn btn-outline-secondary selectToken" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select <br> Token</button>
 <ul class="dropdown-menu w-30">
-  <li><a class="dropdown-item"><img src="assets/images/tcc.png" />&nbsp;&nbsp;TCC</a></li>
+  <li><a class="dropdown-item"><img src="assets/images/tmc.png" />&nbsp;&nbsp;TMC</a></li>
 </ul>
 `
 
