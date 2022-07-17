@@ -5,6 +5,9 @@ import "./ERC20.sol";
 
 contract Dex {
 
+    // 購入完了をフロントに伝えるイベント
+    event buy(address _buyer, address _tokenAddr, uint256 _cost, uint256 _amount);
+
     // トークンを購入する関数
     // 購入したいトークンコントラクトのアドレス_tokenAddr、トークン購入のためにに支払う必要のあるETH_cost、購入したいトークン量_amount
     // DEXコントラクトにETHを送金するため、payable修飾子をつける
@@ -17,6 +20,8 @@ contract Dex {
         require(token.balanceOf(address(this)) >= _amount, "Token sold out");
         // msg.senderに対し、トークンを_amountだけ転送
         token.transfer(msg.sender, _amount);
+        // イベント実行
+        emit buy(msg.sender, _tokenAddr, _cost, _amount);
     }
 
 }
