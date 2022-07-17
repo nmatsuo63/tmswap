@@ -6,7 +6,11 @@ import "./ERC20.sol";
 contract Dex {
 
     // 購入完了をフロントに伝えるイベント
+    // 購入者のアドレス_buyer、購入したトークンコントラクトのアドレス_tokenAddr、購入者が支払ったETHの量_cost、購入したトークン量_amount
     event buy(address _buyer, address _tokenAddr, uint256 _cost, uint256 _amount);
+    // 売却完了をフロントに伝えるイベント
+    // 売却者のアドレス_seller、売却したトークンコントラクトのアドレス_tokenAddr、売却者がDEXに転送したトークンの量_cost、対価としてDEXから支払われたETHの量_amount
+    event sell(address _seller, address _tokenAddr, uint256 _cost, uint256 _amount);
 
     // トークンを購入する関数
     // 購入したいトークンコントラクトのアドレス_tokenAddr、トークン購入のためにに支払う必要のあるETH_cost、購入したいトークン量_amount
@@ -43,6 +47,8 @@ contract Dex {
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
         // ETHの送金が正常に行われたかを確認
         require(success, "ETH transfer failed");
+        // sellイベントの実行
+        emit sell(msg.sender, _tokenAddr, _cost, _amount);
     }
 
 }
